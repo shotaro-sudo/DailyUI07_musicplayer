@@ -247,18 +247,19 @@
       font-size: 28px;
       font-weight: 700;
       /* これから再生：中間の明るさ */
-      color: rgba(255, 255, 255, 0.55);
+      color: #ffffff;
+      opacity: 0.55;
       line-height: 1.5;
       cursor: pointer;
-      transition: color 0.5s, transform 0.3s;
+      transition: opacity 0.5s, transform 0.3s;
       transform-origin: left center;
       letter-spacing: -0.02em;
     }
-    .lyric-line:hover { color: rgba(255, 255, 255, 0.7); }
+    .lyric-line:hover { opacity: 0.75; }
     /* 現在地：#FFFFFF（1行のみ・最も明るい） */
-    .lyric-line.active { color: #ffffff; transform: scale(1.02); }
+    .lyric-line.active { opacity: 1; transform: scale(1.02); }
     /* 既に再生済み（現在地より上）：最も暗い */
-    .lyric-line.past { color: rgba(255, 255, 255, 0.12); }
+    .lyric-line.past { opacity: 0.15; }
 
     .playlist-hero {
       display: flex;
