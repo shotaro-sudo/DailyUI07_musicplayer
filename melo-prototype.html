@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MELO — プレイリスト</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+JP:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #030303;
+      --surface: #212121;
+      --surface2: #1d1d1d;
+      --border: #292929;
+      --border2: #484848;
+      --accent: #5361f4;
+      --text: #ffffff;
+      --muted: #aaa;
+      --muted2: #999;
+      --bar-bg: #4d4d4d;
+      --hover: #1a1a1a;
+      --active-row: #1c1c2e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 62px 1fr 82px;
+      grid-template-columns: 342px 1fr 342px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 40px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon img { width: 16px; height: 16px; }
+    .logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.242px;
+    }
+
+    .search-bar {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #292929;
+      border: 1px solid var(--border2);
+      border-radius: 60px;
+      padding: 0 12px;
+      height: 36px;
+      width: 464px;
+      cursor: text;
+      transition: border-color 0.2s;
+    }
+    .search-bar:hover { border-color: #666; }
+    .search-bar input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      width: 100%;
+    }
+    .search-bar input::placeholder { color: #949494; }
+    .search-icon { width: 20px; height: 20px; flex-shrink: 0; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 40px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .icon-btn:hover { background: #2a2a2a; }
+    .icon-btn img { width: 20px; height: 20px; }
+    .icon-btn.frame-icon { padding: 0; }
+    .icon-btn.frame-icon img { width: 36px; height: 36px; }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 40px;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    /* ─── SIDEBAR LEFT ─── */
+    .sidebar-left {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .sidebar-left::-webkit-scrollbar { width: 4px; }
+    .sidebar-left::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .nav-section { padding: 0 16px 0 16px; display: flex; flex-direction: column; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 19px;
+      padding: 11px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.176px;
+    }
+    .nav-item:hover { background: #1a1a1a; }
+    .nav-item.active { background: var(--surface2); }
+    .nav-item img { width: 26px; height: 26px; flex-shrink: 0; }
+
+    .section-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      padding: 0 8px 8px;
+      letter-spacing: -0.154px;
+    }
+
+    .playlist-section { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+
+    .playlist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .playlist-item:hover { background: #1a1a1a; }
+    .playlist-thumb {
+      width: 46px; height: 46px;
+      border-radius: 60px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .playlist-thumb.square { border-radius: 4px; }
+    .playlist-info { display: flex; flex-direction: column; justify-content: space-between; height: 46px; }
+    .playlist-name { font-size: 16px; color: var(--text); letter-spacing: -0.176px; }
+    .playlist-sub { font-size: 14px; color: var(--muted); letter-spacing: -0.154px; }
+
+    /* ─── MAIN CONTENT ─── */
+    main {
+      overflow: hidden;
+      position: relative;
+    }
+    main::-webkit-scrollbar { width: 4px; }
+    main::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    #playlist-view {
+      height: 100%;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 44px;
+    }
+    #playlist-view::-webkit-scrollbar { width: 4px; }
+    #playlist-view::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    #lyrics-view {
+      display: none;
+      height: 100%;
+      overflow-y: auto;
+      padding: 40px 60px;
+      flex-direction: column;
+      align-items: flex-start;
+      position: relative;
+    }
+    #lyrics-view::before {
+      content: '';
+      position: fixed;
+      inset: 62px 342px 82px 342px;
+      background-image: url('https://www.figma.com/api/mcp/asset/f7debe97-13a8-493b-983f-59cc4c8bde18');
+      background-size: cover;
+      background-position: center top;
+      filter: blur(4px);
+      opacity: 0.75;
+      pointer-events: none;
+      z-index: 0;
+    }
+    /* 暗いオーバーレイで文字の読みやすさを確保 */
+    #lyrics-view::after {
+      content: '';
+      position: fixed;
+      inset: 62px 342px 82px 342px;
+      background: rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+      z-index: 0;
+    }
+    #lyrics-view > * { position: relative; z-index: 2; }
+    #lyrics-view::-webkit-scrollbar { width: 4px; }
+    #lyrics-view::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+    #lyrics-view.active { display: flex; }
+
+    .lyrics-heading {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 40px;
+    }
+    .lyrics-content { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .lyric-line {
+      font-size: 28px;
+      font-weight: 700;
+      /* これから再生：中間の明るさ */
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.5;
+      cursor: pointer;
+      transition: color 0.5s, transform 0.3s;
+      transform-origin: left center;
+      letter-spacing: -0.02em;
+    }
+    .lyric-line:hover { color: rgba(255, 255, 255, 0.7); }
+    /* 現在地：#FFFFFF（1行のみ・最も明るい） */
+    .lyric-line.active { color: #ffffff; transform: scale(1.02); }
+    /* 既に再生済み（現在地より上）：最も暗い */
+    .lyric-line.past { color: rgba(255, 255, 255, 0.12); }
+
+    .playlist-hero {
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+    }
+    .playlist-cover {
+      width: 244px; height: 244px;
+      border-radius: 12px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    .playlist-meta { display: flex; flex-direction: column; gap: 36px; width: 366px; }
+    .playlist-title-group { display: flex; flex-direction: column; gap: 8px; }
+    .playlist-title {
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -0.352px;
+      line-height: 1.2;
+    }
+    .playlist-details {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      letter-spacing: -0.154px;
+    }
+    .playlist-owner-avatar {
+      width: 24px; height: 24px;
+      border-radius: 40px;
+      object-fit: cover;
+    }
+    .detail-name { font-weight: 500; color: var(--text); }
+    .detail-sep, .detail-info { color: var(--muted); }
+
+    .playlist-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-play {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: var(--accent);
+      color: var(--text);
+      border: none;
+      border-radius: 40px;
+      padding: 9px 14px 9px 10px;
+      height: 36px;
+      width: 128px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      letter-spacing: -0.154px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-play:hover { background: #4350e0; }
+    .btn-play:active { transform: scale(0.97); }
+    .btn-play svg { width: 16px; height: 16px; }
+
+    .action-icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 40px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .action-icon-btn:hover { background: #2a2a2a; }
+    .action-icon-btn img { width: 20px; height: 20px; }
+    .action-icon-btn.frame-icon { padding: 0; }
+    .action-icon-btn.frame-icon img { width: 36px; height: 36px; }
+
+    /* Song list */
+    .song-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 8px 8px 8px 58px;
+      border-bottom: 1px solid var(--surface2);
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: -0.154px;
+    }
+    .col-title { flex: 1; }
+    .col-album { flex: 1; }
+    .col-plays { width: 60px; }
+    .col-time { width: 60px; text-align: right; }
+
+    .song-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.12s;
+      position: relative;
+    }
+    .song-row:hover { background: #1a1a1a; }
+    .song-row.playing { background: var(--active-row); }
+
+    .song-thumb-wrap {
+      width: 46px; height: 46px;
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .song-thumb {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .song-thumb-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9,9,9,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .song-row:hover .song-thumb-overlay,
+    .song-row.playing .song-thumb-overlay { opacity: 1; }
+    .song-thumb-overlay svg { width: 20px; height: 20px; fill: white; }
+    .song-row.playing .song-thumb-overlay svg.play-icon { display: none; }
+    .song-row.playing .song-thumb-overlay svg.bars-icon { display: block; }
+    .song-thumb-overlay svg.bars-icon { display: none; }
+
+    .song-info {
+      flex: 1;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      min-width: 0;
+    }
+    .song-title-group { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .song-title {
+      font-size: 16px;
+      color: var(--text);
+      letter-spacing: -0.176px;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-row.playing .song-title { color: var(--accent); }
+    .song-artist {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: -0.154px;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-album {
+      flex: 1;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: -0.154px;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-plays { width: 60px; font-size: 14px; color: var(--muted); letter-spacing: -0.154px; }
+    .song-time { width: 60px; font-size: 14px; color: var(--muted); text-align: right; letter-spacing: -0.154px; }
+
+    /* ─── SIDEBAR RIGHT ─── */
+    .sidebar-right {
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+    .sidebar-right::-webkit-scrollbar { width: 4px; }
+    .sidebar-right::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .artist-card {
+      background: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 23px 20px;
+    }
+    .artist-banner {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+    .artist-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .artist-name { font-size: 18px; font-weight: 500; color: var(--text); letter-spacing: -0.198px; }
+    .artist-listeners { font-size: 16px; color: var(--muted); letter-spacing: -0.176px; }
+    .btn-follow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--muted);
+      border-radius: 40px;
+      padding: 8px 12px;
+      height: 36px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      background: none;
+      cursor: pointer;
+      letter-spacing: -0.165px;
+      transition: border-color 0.15s, background 0.15s;
+      align-self: flex-start;
+    }
+    .btn-follow:hover { border-color: var(--text); background: #2a2a2a; }
+    .btn-follow.following { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .artist-desc { font-size: 14px; color: var(--muted); line-height: 1.6; letter-spacing: -0.154px; }
+
+    .right-section { padding: 0 23px 20px; display: flex; flex-direction: column; gap: 8px; }
+    .right-section-label { font-size: 14px; font-weight: 500; color: var(--muted); letter-spacing: -0.154px; padding-bottom: 4px; }
+
+    .popular-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .popular-row:hover { background: #1a1a1a; }
+    .popular-num { width: 12px; font-size: 14px; color: var(--muted); flex-shrink: 0; }
+    .popular-thumb { width: 46px; height: 46px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+    .popular-title { font-size: 16px; color: var(--text); letter-spacing: -0.176px; }
+
+    .related-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .related-row:hover { background: #1a1a1a; }
+    .related-thumb { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .related-name { font-size: 16px; color: var(--text); letter-spacing: -0.176px; }
+
+    /* ─── FOOTER PLAYER ─── */
+    footer {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .now-playing {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 240px;
+      flex-shrink: 0;
+    }
+    .now-thumb { width: 46px; height: 46px; border-radius: 4px; object-fit: cover; }
+    .now-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .now-title { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .now-artist { font-size: 14px; color: var(--muted2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .heart-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .heart-btn:hover { background: #333; }
+    .heart-btn svg { width: 18px; height: 18px; }
+    .heart-btn.liked svg { fill: var(--accent); stroke: var(--accent); }
+
+    .player-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ctrl-btn {
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      border-radius: 16px;
+      transition: background 0.15s;
+    }
+    .ctrl-btn:hover { background: #333; }
+    .ctrl-btn svg { width: 16px; height: 16px; fill: var(--muted); }
+    .ctrl-btn.active svg { fill: var(--accent); }
+    /* 歌詞ボタンはストローク色のみ変更 */
+    #lyrics-btn svg { fill: none; stroke: var(--muted); }
+    #lyrics-btn.active svg { fill: none; stroke: var(--accent); }
+    .lyrics-ctrl {
+      flex-direction: column;
+      gap: 3px;
+      height: 36px;
+    }
+    #lyrics-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: none;
+      flex-shrink: 0;
+    }
+    #lyrics-btn.active #lyrics-dot { display: block; }
+
+    .ctrl-btn.play-pause {
+      width: 36px; height: 36px;
+      border-radius: 18px;
+      background: #262626;
+    }
+    .ctrl-btn.play-pause:hover { background: #333; }
+    .ctrl-btn.play-pause svg { width: 15px; height: 15px; fill: var(--text); }
+    .ctrl-btn.play-pause img { width: 15px; height: 15px; }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 480px;
+    }
+    .time-label { font-size: 10px; color: var(--muted); width: 24px; flex-shrink: 0; }
+    .time-label.right { text-align: right; }
+
+    .progress-track {
+      flex: 1;
+      height: 3px;
+      background: var(--bar-bg);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--text);
+      border-radius: 2px;
+      position: relative;
+      transition: width 1s linear;
+    }
+    .progress-fill::after {
+      content: '';
+      width: 12px; height: 12px;
+      background: var(--text);
+      border-radius: 50%;
+      position: absolute;
+      right: -6px;
+      top: -4.5px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .progress-track:hover .progress-fill::after { opacity: 1; }
+
+    .player-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .vol-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .vol-track {
+      width: 80px; height: 3px;
+      background: var(--bar-bg);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+    .vol-fill {
+      height: 100%;
+      background: var(--text);
+      border-radius: 2px;
+      width: 70%;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: #333;
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <img src="https://www.figma.com/api/mcp/asset/63c58430-98f5-4d62-82e1-7fa3f25d074f" alt="MELO">
+    </div>
+    <span class="logo-text">MELO</span>
+  </div>
+
+  <div class="search-bar">
+    <img class="search-icon" src="https://www.figma.com/api/mcp/asset/c19041d2-c181-497d-a98b-8e7c617a7253" alt="">
+    <input type="text" placeholder="曲、アーティスト、アルバムを検索">
+  </div>
+
+  <div class="header-right">
+    <div class="icon-btn frame-icon">
+      <img src="https://www.figma.com/api/mcp/asset/a7fdba0d-2b34-4781-9868-ef84a4b1fcc7" alt="notifications">
+    </div>
+    <div class="icon-btn">
+      <img src="https://www.figma.com/api/mcp/asset/3370c88b-14ed-4bf5-912b-71d00d0842d5" alt="settings">
+    </div>
+    <img class="avatar" src="https://www.figma.com/api/mcp/asset/948a6b75-f6d2-4f67-ac7a-3f6474aaf593" alt="avatar">
+  </div>
+</header>
+
+<!-- SIDEBAR LEFT -->
+<aside class="sidebar-left">
+  <div class="nav-section">
+    <div class="nav-item active" data-nav="home">
+      <img src="https://www.figma.com/api/mcp/asset/429107f9-988c-46a6-bb2c-5bd131a9cd9f" alt="">
+      <span>ホーム</span>
+    </div>
+    <div class="nav-item" data-nav="search">
+      <img src="https://www.figma.com/api/mcp/asset/e572c1b3-5f32-4250-8530-001aaeafa636" alt="">
+      <span>検索</span>
+    </div>
+    <div class="nav-item" data-nav="new">
+      <img src="https://www.figma.com/api/mcp/asset/38602df5-4928-484b-8c44-7bb8ea71d8e7" alt="">
+      <span>新着</span>
+    </div>
+  </div>
+
+  <div class="playlist-section">
+    <div class="section-label">ライブラリ</div>
+    <div class="nav-item" data-nav="recent">
+      <img src="https://www.figma.com/api/mcp/asset/138166f6-7b0e-4700-b90e-db1528104d62" alt="">
+      <span>最近追加した項目</span>
+    </div>
+    <div class="nav-item" data-nav="artists">
+      <img src="https://www.figma.com/api/mcp/asset/977a49e9-46c1-404f-a3f8-7f698641973f" alt="">
+      <span>アーティスト</span>
+    </div>
+    <div class="nav-item" data-nav="albums">
+      <img src="https://www.figma.com/api/mcp/asset/c137005d-c48d-4990-8701-5fac064268ec" alt="">
+      <span>アルバム</span>
+    </div>
+    <div class="nav-item" data-nav="songs">
+      <img src="https://www.figma.com/api/mcp/asset/deeef1a9-6695-426f-8c4f-8528a4f180df" alt="">
+      <span>曲</span>
+    </div>
+  </div>
+
+  <div class="playlist-section">
+    <div class="section-label">プレイリスト</div>
+    <div class="playlist-item">
+      <img class="playlist-thumb" src="https://www.figma.com/api/mcp/asset/f7debe97-13a8-493b-983f-59cc4c8bde18" alt="">
+      <div class="playlist-info">
+        <span class="playlist-name">茅場 アオ</span>
+        <span class="playlist-sub">アーティスト</span>
+      </div>
+    </div>
+    <div class="playlist-item">
+      <img class="playlist-thumb" src="https://www.figma.com/api/mcp/asset/58abe06a-91bd-489c-8e07-30094dda7926" alt="">
+      <div class="playlist-info">
+        <span class="playlist-name">LOG/OUT</span>
+        <span class="playlist-sub">アーティスト</span>
+      </div>
+    </div>
+    <div class="playlist-item">
+      <img class="playlist-thumb" src="https://www.figma.com/api/mcp/asset/a26262bc-d5f2-4124-83c5-fa172c6c825c" alt="">
+      <div class="playlist-info">
+        <span class="playlist-name">NIKU-ZOME</span>
+        <span class="playlist-sub">アーティスト</span>
+      </div>
+    </div>
+    <div class="playlist-item">
+      <img class="playlist-thumb square" src="https://www.figma.com/api/mcp/asset/f755f830-d017-48d5-bd3f-06b218eacf24" alt="">
+      <div class="playlist-info">
+        <span class="playlist-name">テンションが上がる曲</span>
+        <span class="playlist-sub">プレイリスト・Sho</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+<div id="playlist-view">
+  <!-- Playlist Hero -->
+  <div class="playlist-hero">
+    <img class="playlist-cover" src="https://www.figma.com/api/mcp/asset/534f65a3-f5ff-4861-b8b3-22a8dfb7b5ed" alt="作業用">
+    <div class="playlist-meta">
+      <div class="playlist-title-group">
+        <h1 class="playlist-title">作業用</h1>
+        <div class="playlist-details">
+          <img class="playlist-owner-avatar" src="https://www.figma.com/api/mcp/asset/46c8bf1a-1bc7-4a3b-8a94-190ad24f4126" alt="">
+          <span class="detail-name">Syun</span>
+          <span class="detail-sep">･</span>
+          <span class="detail-info">1,844件の保存</span>
+          <span class="detail-sep">･</span>
+          <span class="detail-info">11曲</span>
+          <span class="detail-sep">･</span>
+          <span class="detail-info">35分16秒</span>
+        </div>
+      </div>
+      <div class="playlist-actions">
+        <button class="btn-play" id="hero-play-btn">
+          <svg viewBox="0 0 16 16" fill="white"><polygon points="3,1 15,8 3,15"/></svg>
+          再生
+        </button>
+        <div class="action-icon-btn" id="shuffle-hero-btn" title="シャッフル" style="opacity:1;">
+          <img src="https://www.figma.com/api/mcp/asset/9efcef9a-dedc-4191-81fd-ba4b3782d1f8" alt="shuffle" style="filter:brightness(0) invert(1);">
+        </div>
+        <div class="action-icon-btn frame-icon" id="like-playlist-btn" title="お気に入り">
+          <img src="https://www.figma.com/api/mcp/asset/7dfcf268-073c-48b8-aeb4-e25234314619" alt="like">
+        </div>
+        <div class="action-icon-btn" title="ダウンロード">
+          <img src="https://www.figma.com/api/mcp/asset/8aab8188-2cd1-4b0f-86f0-2a1d05ce3c6f" alt="download">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Song List -->
+  <div class="song-list">
+    <div class="list-header">
+      <span class="col-title">タイトル</span>
+      <span class="col-album">アルバム</span>
+      <span class="col-plays">再生回数</span>
+      <span class="col-time">時間</span>
+    </div>
+
+    <div id="song-list-rows"></div>
+  </div>
+</div><!-- /#playlist-view -->
+
+<div id="lyrics-view">
+  <div class="lyrics-content" id="lyrics-content"></div>
+</div>
+</main>
+
+<!-- SIDEBAR RIGHT -->
+<aside class="sidebar-right">
+  <!-- Artist Card -->
+  <div class="artist-card">
+    <img class="artist-banner" src="https://www.figma.com/api/mcp/asset/f7debe97-13a8-493b-983f-59cc4c8bde18" alt="茅場 アオ">
+    <div class="artist-body">
+      <div>
+        <div class="artist-name">茅場 アオ</div>
+        <div class="artist-listeners">1,234,567人の月間リスナー</div>
+      </div>
+      <button class="btn-follow" id="follow-btn">フォローする</button>
+      <p class="artist-desc">東京を拠点とする電子音楽プロデューサー。ドリームポップとアンビエントを融合させた同時のサウンドで知られる。2019年のデビュー作から3作品連続でチャートインを果たした。</p>
+    </div>
+  </div>
+
+  <!-- Popular Songs -->
+  <div class="right-section">
+    <div class="right-section-label">人気の曲</div>
+    <div class="popular-row">
+      <span class="popular-num">1</span>
+      <img class="popular-thumb" src="https://www.figma.com/api/mcp/asset/ccdad7f8-3b26-41da-a7c8-73c7dd6d2070" alt="">
+      <span class="popular-title">エンドロールが待ちきれない</span>
+    </div>
+    <div class="popular-row">
+      <span class="popular-num">2</span>
+      <img class="popular-thumb" src="https://www.figma.com/api/mcp/asset/f49409a2-d799-417e-8872-349828e5c036" alt="">
+      <span class="popular-title">沈黙のオーケストラ</span>
+    </div>
+    <div class="popular-row">
+      <span class="popular-num">3</span>
+      <img class="popular-thumb" src="https://www.figma.com/api/mcp/asset/d0349b7a-c6df-4ab8-aea5-ca5c42101058" alt="">
+      <span class="popular-title">さよなら、パラレルワールド</span>
+    </div>
+    <div class="popular-row">
+      <span class="popular-num">4</span>
+      <img class="popular-thumb" src="https://www.figma.com/api/mcp/asset/80051a76-8114-4dd2-a1bd-707ccaf33ef2" alt="">
+      <span class="popular-title">透明な君へ</span>
+    </div>
+    <div class="popular-row">
+      <span class="popular-num">5</span>
+      <img class="popular-thumb" src="https://www.figma.com/api/mcp/asset/4b58db61-381d-4b73-9882-99182364b2e5" alt="">
+      <span class="popular-title">Midnight Macaron</span>
+    </div>
+  </div>
+
+  <!-- Related Artists -->
+  <div class="right-section">
+    <div class="right-section-label">関連のアーティスト</div>
+    <div class="related-row">
+      <img class="related-thumb" src="https://www.figma.com/api/mcp/asset/a27117c4-859f-4b72-99c9-4a8a25ee6c7e" alt="">
+      <span class="related-name">灰色の街</span>
+    </div>
+    <div class="related-row">
+      <img class="related-thumb" src="https://www.figma.com/api/mcp/asset/30e955d8-b7fb-4ee8-9555-307c4cdd08c5" alt="">
+      <span class="related-name">The Clockwork Garden</span>
+    </div>
+    <div class="related-row">
+      <img class="related-thumb" src="https://www.figma.com/api/mcp/asset/bfd47da3-4e3e-47bb-a203-710e2c29d70e" alt="">
+      <span class="related-name">夜詠</span>
+    </div>
+    <div class="related-row">
+      <img class="related-thumb" src="https://www.figma.com/api/mcp/asset/efda9d02-30f9-4098-b431-000eafe57dd2" alt="">
+      <span class="related-name">Neon Chrysalis</span>
+    </div>
+    <div class="related-row">
+      <img class="related-thumb" src="https://www.figma.com/api/mcp/asset/24cdea9e-05c8-445b-9d72-3b42a49b59ab" alt="">
+      <span class="related-name">翠睡</span>
+    </div>
+  </div>
+</aside>
+
+<!-- FOOTER PLAYER -->
+<footer>
+  <!-- Now Playing -->
+  <div class="now-playing">
+    <img class="now-thumb" id="now-thumb" src="https://www.figma.com/api/mcp/asset/6ec9d919-3ae5-4884-859f-a2c111262611" alt="">
+    <div class="now-info">
+      <span class="now-title" id="now-title">夜明けのノイズ</span>
+      <span class="now-artist" id="now-artist">茅場 アオ</span>
+    </div>
+    <div class="heart-btn" id="add-btn" title="ライブラリに追加">
+      <img src="https://www.figma.com/api/mcp/asset/a73aeab5-3d3b-4544-a104-04967ed35bb6" alt="追加" style="width:32px;height:32px;">
+    </div>
+  </div>
+
+  <!-- Player Controls -->
+  <div class="player-center">
+    <div class="player-controls">
+      <div class="ctrl-btn" id="shuffle-btn" title="シャッフル">
+        <img src="https://www.figma.com/api/mcp/asset/9efcef9a-dedc-4191-81fd-ba4b3782d1f8" alt="シャッフル" style="width:15px;height:15px;opacity:1;filter:brightness(0) invert(1);">
+      </div>
+      <div class="ctrl-btn" id="prev-btn" title="前の曲">
+        <svg viewBox="0 0 24 24"><path d="M19 20L9 12l10-8v16zM5 4v16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ctrl-btn play-pause" id="play-btn" title="再生/一時停止">
+        <img id="play-icon" src="https://www.figma.com/api/mcp/asset/4d7a2fd3-b01b-4c35-8403-455a7eb9b486" alt="再生">
+        <svg id="pause-icon" viewBox="0 0 16 16" style="display:none"><rect x="3" y="1" width="4" height="14" fill="white"/><rect x="9" y="1" width="4" height="14" fill="white"/></svg>
+      </div>
+      <div class="ctrl-btn" id="next-btn" title="次の曲">
+        <svg viewBox="0 0 24 24"><path d="M5 4l10 8-10 8V4zM19 4v16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ctrl-btn" id="repeat-btn" title="リピート">
+        <svg viewBox="0 0 24 24"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <span class="time-label" id="current-time">0:43</span>
+      <div class="progress-track" id="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width: 19.3%"></div>
+      </div>
+      <span class="time-label right">3:42</span>
+    </div>
+  </div>
+
+  <!-- Right Controls -->
+  <div class="player-right">
+    <div class="ctrl-btn lyrics-ctrl" title="歌詞" id="lyrics-btn">
+      <img id="lyrics-icon" src="https://www.figma.com/api/mcp/asset/676ddd17-35a5-4312-8c09-3e04d384dc02" alt="歌詞" style="width:14px;height:14px;filter:brightness(0) invert(1);">
+      <span id="lyrics-dot"></span>
+    </div>
+    <div class="ctrl-btn" title="キュー">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    </div>
+    <div class="vol-wrap">
+      <div class="ctrl-btn" title="音量">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </div>
+      <div class="vol-track" id="vol-track">
+        <div class="vol-fill" id="vol-fill"></div>
+      </div>
+    </div>
+    <div class="ctrl-btn" title="フルスクリーン">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── DATA ───
+  const songs = [
+    { title: '夜明けのノイズ', artist: '茅場 アオ', album: 'Invisible Interface', plays: '1.2M', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/6ec9d919-3ae5-4884-859f-a2c111262611' },
+    { title: 'Syntax Error in My Heart', artist: 'LOG/OUT', album: 'Compiled Emotions', plays: '845K', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/06dd4d76-c9ba-4cec-ac36-071e829a931a' },
+    { title: 'Skin Deep, Bone White', artist: 'NIKU-ZOME', album: 'Wearable Anatomy', plays: '2.1M', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/82afbc02-52a6-45bb-a49c-58fdc9f796f8' },
+    { title: '群青の底で息をする', artist: '羊歯と雨', album: '水槽のジオラマ', plays: '512K', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/3faefa8b-57d3-4d4d-8d61-b217f15168e2' },
+    { title: 'Neon Genesis Nostalgia', artist: 'VAPOR_WAVES_99', album: 'Cybernetic Sunset', plays: '3.5M', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/c3b681be-4be2-47f7-8691-a84defde0f91' },
+    { title: '嘘つきな体温', artist: 'ルミナ', album: '微熱のダイアリー', plays: '95K', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/2636c43f-1411-4747-a4b3-caef1127044b' },
+    { title: '0番線の亡霊', artist: '東京メトロノーム', album: 'Underground Symphony', plays: '15.4M', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/d8e98a2d-0955-486b-86e7-9c950abb3cf8' },
+    { title: 'カフェイン・ララバイ', artist: '夜更かしの理由', album: 'AM 3:00のプレイリスト', plays: '670K', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/45a4fe29-583a-4e46-a452-04d03a9730b4' },
+    { title: 'Plastic Supernova', artist: 'Galaxy Syndicate', album: 'Milky Way Trash', plays: '2.8M', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/9c1ffdbb-f4e3-427c-a396-20f3ad4d89a6' },
+    { title: '名前のない花束', artist: '祈りの栞', album: '忘却のアーカイブ', plays: '112K', time: '4:12', img: 'https://www.figma.com/api/mcp/asset/c94b338a-c1b4-407f-a727-92deaa7c32c2' },
+  ];
+
+  // ─── STATE ───
+  let currentSong = 0;
+  let isPlaying = false;
+  let isShuffle = false;
+  let isRepeat = false;
+  let isLiked = false;
+  let isFollowing = false;
+  let progressSeconds = 43;
+  const totalSeconds = 222;
+  let progressTimer = null;
+
+  // ─── RENDER SONG LIST ───
+  function renderSongs() {
+    const container = document.getElementById('song-list-rows');
+    container.innerHTML = songs.map((s, i) => `
+      <div class="song-row ${i === currentSong ? 'playing' : ''}" data-index="${i}">
+        <div class="song-thumb-wrap">
+          <img class="song-thumb" src="${s.img}" alt="">
+          <div class="song-thumb-overlay">
+            <svg class="play-icon" viewBox="0 0 16 16"><polygon points="3,1 15,8 3,15"/></svg>
+            <svg class="bars-icon" viewBox="0 0 24 24" fill="white"><rect x="2" y="4" width="4" height="16"/><rect x="10" y="8" width="4" height="12"/><rect x="18" y="2" width="4" height="18"/></svg>
+          </div>
+        </div>
+        <div class="song-info">
+          <div class="song-title-group">
+            <span class="song-title">${s.title}</span>
+            <span class="song-artist">${s.artist}</span>
+          </div>
+          <span class="song-album">${s.album}</span>
+          <span class="song-plays">${s.plays}</span>
+          <span class="song-time">${s.time}</span>
+        </div>
+      </div>
+    `).join('');
+
+    container.querySelectorAll('.song-row').forEach(row => {
+      row.addEventListener('click', () => playSong(parseInt(row.dataset.index)));
+    });
+  }
+
+  // ─── PLAY SONG ───
+  function playSong(index) {
+    currentSong = index;
+    isPlaying = true;
+    progressSeconds = 0;
+    updateNowPlaying();
+    updatePlayBtn();
+    renderSongs();
+    startProgress();
+    showToast(`再生中: ${songs[index].title}`);
+  }
+
+  function updateNowPlaying() {
+    const s = songs[currentSong];
+    document.getElementById('now-title').textContent = s.title;
+    document.getElementById('now-artist').textContent = s.artist;
+    document.getElementById('now-thumb').src = s.img;
+  }
+
+  // ─── PROGRESS ───
+  function startProgress() {
+    clearInterval(progressTimer);
+    if (!isPlaying) return;
+    progressTimer = setInterval(() => {
+      progressSeconds++;
+      if (progressSeconds >= totalSeconds) {
+        if (isRepeat) {
+          progressSeconds = 0;
+        } else {
+          nextSong();
+          return;
+        }
+      }
+      updateProgressUI();
+    }, 1000);
+  }
+
+  function updateProgressUI() {
+    const pct = (progressSeconds / totalSeconds) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('current-time').textContent = formatTime(progressSeconds);
+  }
+
+  function formatTime(s) {
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+  }
+
+  // ─── PLAY/PAUSE ───
+  function updatePlayBtn() {
+    document.getElementById('play-icon').style.display = isPlaying ? 'none' : 'block';
+    document.getElementById('pause-icon').style.display = isPlaying ? 'block' : 'none';
+  }
+
+  document.getElementById('play-btn').addEventListener('click', () => {
+    isPlaying = !isPlaying;
+    updatePlayBtn();
+    if (isPlaying) startProgress();
+    else clearInterval(progressTimer);
+  });
+
+  // Hero play button
+  document.getElementById('hero-play-btn').addEventListener('click', () => {
+    playSong(0);
+  });
+
+  // ─── PREV / NEXT ───
+  function nextSong() {
+    let next = isShuffle
+      ? Math.floor(Math.random() * songs.length)
+      : (currentSong + 1) % songs.length;
+    playSong(next);
+  }
+
+  document.getElementById('next-btn').addEventListener('click', nextSong);
+  document.getElementById('prev-btn').addEventListener('click', () => {
+    if (progressSeconds > 3) {
+      progressSeconds = 0;
+      updateProgressUI();
+    } else {
+      let prev = (currentSong - 1 + songs.length) % songs.length;
+      playSong(prev);
+    }
+  });
+
+  // ─── SHUFFLE ───
+  function updateShuffleUI() {
+    // 常に#FFFFFF（白）、アクティブ時は少し明るく
+    const footerImg = document.querySelector('#shuffle-btn img');
+    const heroBtn = document.getElementById('shuffle-hero-btn');
+    if (footerImg) footerImg.style.opacity = '1';
+    if (heroBtn) heroBtn.style.opacity = '1';
+  }
+  document.getElementById('shuffle-btn').addEventListener('click', () => {
+    isShuffle = !isShuffle;
+    updateShuffleUI();
+    showToast(isShuffle ? 'シャッフルON' : 'シャッフルOFF');
+  });
+  document.getElementById('shuffle-hero-btn').addEventListener('click', () => {
+    isShuffle = !isShuffle;
+    updateShuffleUI();
+    showToast(isShuffle ? 'シャッフルON' : 'シャッフルOFF');
+  });
+
+  // ─── REPEAT ───
+  document.getElementById('repeat-btn').addEventListener('click', () => {
+    isRepeat = !isRepeat;
+    document.getElementById('repeat-btn').classList.toggle('active', isRepeat);
+    showToast(isRepeat ? 'リピートON' : 'リピートOFF');
+  });
+
+  // ─── ADD BTN ───
+  document.getElementById('add-btn').addEventListener('click', () => {
+    showToast('ライブラリに追加しました');
+  });
+
+  // ─── FOLLOW ───
+  document.getElementById('follow-btn').addEventListener('click', () => {
+    isFollowing = !isFollowing;
+    const btn = document.getElementById('follow-btn');
+    btn.classList.toggle('following', isFollowing);
+    btn.textContent = isFollowing ? 'フォロー中' : 'フォローする';
+    showToast(isFollowing ? '茅場 アオをフォローしました' : 'フォローを解除しました');
+  });
+
+  // ─── PROGRESS TRACK CLICK ───
+  document.getElementById('progress-track').addEventListener('click', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    progressSeconds = Math.floor(pct * totalSeconds);
+    updateProgressUI();
+  });
+
+  // ─── VOLUME TRACK CLICK ───
+  document.getElementById('vol-track').addEventListener('click', (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    document.getElementById('vol-fill').style.width = (pct * 100) + '%';
+  });
+
+  // ─── NAV ITEMS ───
+  document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+    });
+  });
+
+  // ─── TOAST ───
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  // ─── LYRICS ───
+  const lyricsLines = [
+    { text: '夜が溶ける前に', time: 0 },
+    { text: '君の声を拾い集めた', time: 10 },
+    { text: 'ノイズの中に紛れた', time: 20 },
+    { text: '小さな光を掴んで', time: 30 },
+    { text: '', time: 38 },
+    { text: '夜明けが来るたびに', time: 43 },
+    { text: '僕は少し遠くなる', time: 53 },
+    { text: 'それでも歌い続ける', time: 63 },
+    { text: 'このノイズが消えるまで', time: 73 },
+    { text: '', time: 81 },
+    { text: '静寂の向こう側に', time: 86 },
+    { text: '君がいるような気がして', time: 96 },
+    { text: '手を伸ばしてみたけど', time: 106 },
+    { text: '届かない　届かない', time: 116 },
+    { text: '', time: 124 },
+    { text: '夜明けのノイズよ', time: 129 },
+    { text: '僕を連れて行かないで', time: 139 },
+    { text: 'まだここにいたい', time: 149 },
+    { text: 'この声が枯れるまで', time: 159 },
+  ];
+
+  const lyricsContainer = document.getElementById('lyrics-content');
+  lyricsLines.forEach((line, i) => {
+    const el = document.createElement('div');
+    el.className = 'lyric-line';
+    el.textContent = line.text || '\u00A0';
+    el.dataset.index = i;
+    el.addEventListener('click', () => {
+      progressSeconds = line.time;
+      updateProgressUI();
+      updateLyricsHighlight();
+    });
+    lyricsContainer.appendChild(el);
+  });
+
+  function updateLyricsHighlight() {
+    let active = 0;
+    for (let i = 0; i < lyricsLines.length; i++) {
+      if (lyricsLines[i].time <= progressSeconds) active = i;
+    }
+    lyricsContainer.querySelectorAll('.lyric-line').forEach((el, i) => {
+      el.classList.remove('active', 'past');
+      if (i === active) el.classList.add('active');
+      else if (i < active) el.classList.add('past');
+    });
+    const activeEl = lyricsContainer.querySelectorAll('.lyric-line')[active];
+    if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  let lyricsOpen = false;
+  document.getElementById('lyrics-btn').addEventListener('click', () => {
+    lyricsOpen = !lyricsOpen;
+    document.getElementById('playlist-view').style.display = lyricsOpen ? 'none' : '';
+    document.getElementById('lyrics-view').classList.toggle('active', lyricsOpen);
+    // アイコンの色: アクティブ時はアクセントカラー、非アクティブ時はmuted
+    const lyricsIcon = document.getElementById('lyrics-icon');
+    if (lyricsIcon) {
+      // 未選択: #FFFFFF（白）、選択時: #5361F4（MELOメインカラー）
+      lyricsIcon.style.filter = lyricsOpen
+        ? 'brightness(0) invert(1) sepia(1) hue-rotate(198deg) saturate(8) brightness(0.82)'
+        : 'brightness(0) invert(1)';
+    }
+    document.getElementById('lyrics-btn').classList.toggle('active', lyricsOpen);
+    if (lyricsOpen) updateLyricsHighlight();
+  });
+
+  // 既存の startProgress をラップして歌詞も更新
+  const _origStartProgress = startProgress;
+  function startProgressWithLyrics() {
+    clearInterval(progressTimer);
+    if (!isPlaying) return;
+    progressTimer = setInterval(() => {
+      progressSeconds++;
+      if (progressSeconds >= totalSeconds) {
+        if (isRepeat) { progressSeconds = 0; }
+        else { nextSong(); return; }
+      }
+      updateProgressUI();
+      if (lyricsOpen) updateLyricsHighlight();
+    }, 1000);
+  }
+  // startProgress を上書き
+  startProgress = startProgressWithLyrics;
+
+  // ─── INIT ───
+  renderSongs();
+  updateProgressUI();
+  updateShuffleUI();
+</script>
+</body>
+</html>
